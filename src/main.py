@@ -6,6 +6,9 @@ from .ppp_particle_file import ParticleFile
 from .ppp_result_file import ResultsFile
 from .ppp_grid import HorizontalGrid, VerticalGrid
 from .ppp_quantity import Concentration, Counts
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 
 
 def plot(args):
@@ -55,7 +58,6 @@ def process(args):
 
 
 def main():
-
     global_parser = argparse.ArgumentParser(add_help=True)
     subparsers = global_parser.add_subparsers(
         help="Subcommands", dest="subcommand")
@@ -91,10 +93,9 @@ def main():
     process_parser.set_defaults(func=process)
 
     args = global_parser.parse_args()
-
     args.func(args)
 
-    return
+    return 0
 
 
 if __name__ == "__main__":
