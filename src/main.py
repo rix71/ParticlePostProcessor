@@ -23,7 +23,7 @@ def process(args):
     topo_filename = args.topo
     resolution = args.resolution
     id_list = args.id_list
-    # Default should be a list of all options (loop and compute all)
+    # TODO: Default should be a list of all options (loop and compute all)
     sort_by = args.sort
     ini_file = args.ini_file
     last_positions = args.last

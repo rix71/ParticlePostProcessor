@@ -103,5 +103,3 @@ class ParticleFile:
         return self._state
 
 
-if __name__ == "__main__":
-    pf = ParticleFile("/home/enriko/Resuspension/rspn.all.nc")

@@ -118,12 +118,12 @@ class HorizontalGrid(Grid):
 
     @property
     def coords(self):
-        # np.histogramdd reduces size of each dimension by 1
+        # ! np.histogramdd reduces size of each dimension by 1
         return {"lat": self.lat[:-1], "lon": self.lon[:-1]}
 
     @property
     def dims(self):
-        # np.histogramdd reduces size of each dimension by 1
+        # ! np.histogramdd reduces size of each dimension by 1
         return {"lat": len(self.lat)-1, "lon": len(self.lon)-1}
 
     def create_mesh(self):

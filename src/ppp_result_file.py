@@ -93,7 +93,7 @@ class ResultsFile:
                 self.lon = np.array(f.variables["lon"][:])
                 self.lat = np.array(f.variables["lat"][:])
             elif (self.type == "profile"):
-                # Should be able to have a profile that is not along the GOF thalweg
+                # TODO: Should be able to have a profile that is not just along the GOF thalweg
                 self.depth = np.array(f.variables["depth"][:])
                 self.lon = np.array(f.variables["lon"][:])
             countvars = []

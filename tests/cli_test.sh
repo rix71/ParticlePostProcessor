@@ -13,9 +13,9 @@ ppp process -h
 print_separator
 ppp process --help
 print_separator
-ppp process -s ./data/particles.nc --topo ./data/topo.nc -o ./data/output.nc
+ppp process -s ./data/particles.nc --topo ./data/topo.nc -o ./output.nc
 print_separator
 # Should fail (file exists)
-ppp process -s ./data/particles.nc --topo ./data/topo.nc -o ./data/output.nc
+ppp process -s ./data/particles.nc --topo ./data/topo.nc -o ./output.nc
 print_separator
-ppp process -O -s ./data/particles.nc --topo ./data/topo.nc -o ./data/output.nc
+ppp process -O -s ./data/particles.nc --topo ./data/topo.nc -o ./output.nc

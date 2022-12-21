@@ -19,14 +19,14 @@ class Quantity:
         d = {}
         d["data"] = data
         d["name"] = self.name
-        # Here a long name could be added
+        # TODO: Here a long name could be added
         d["attrs"] = {"units": self.units, "name": self.name}
         d["coords"] = self.coords
         d["dims"] = self.dims
         return d
 
     def run(self, counts):
-        # Add some sort of name to the counts
+        # TODO: Add some sort of name to the counts
         data = self.compute(counts)
         return self.data_to_dict(data)
 
