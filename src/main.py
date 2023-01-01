@@ -18,6 +18,14 @@ def plot(args):
     raise NotImplementedError("Plotting not implemented yet")
 
 
+def get_state_name_numbers(particle_file):
+    return np.unique(np.abs(particle_file.state))
+
+
+def get_id_name_numbers(particle_file):
+    return sorted(np.unique(particle_file.id))
+
+
 def process(args):
     print("Processing")
     overwrite = args.overwrite
@@ -34,22 +42,32 @@ def process(args):
     result_file = ResultsFile(result_filename, filename)
 
     if (result_file.exists and overwrite == False):
-        raise Exception("Results file already exists. Use -O to overwrite")
+        raise Exception(
+            f"Results file {result_filename} already exists. Use -O to overwrite")
 
-    particle_file = ParticleFile(filename, id_list)
+    particle_file = ParticleFile(filename, id_list, ini_file)
     grid = HorizontalGrid(topo_filename, resolution)
-    result_file.initialize(grid)
+    result_file.initialize(grid, groups=sort_by)
 
-    counts = grid.get_counts(particle_file, sort_by)
+    # Create name dictionary
+    name_dict = {"state": get_state_name_numbers(particle_file),
+                 "id": get_id_name_numbers(particle_file),
+                 "all": None}
+
+    counts = {sort_type: {
+        "counts": grid.get_counts(particle_file, sort_type),
+        "name_dict": name_dict[sort_type]
+    } for sort_type in sort_by}
 
     # Compute measures
     OrdinaryCounter = Counts(grid)
-    data = OrdinaryCounter.run(counts)
-    result_file.append(data)
-
     ConcentrationCounter = Concentration(grid)
-    data = ConcentrationCounter.run(counts)
-    result_file.append(data)
+    for sort_type in sort_by:
+        data = OrdinaryCounter.run(counts[sort_type])
+        result_file.append(data, sort_type)
+
+        data = ConcentrationCounter.run(counts[sort_type])
+        result_file.append(data, sort_type)
 
     # Save results
     result_file.write()
@@ -58,10 +76,12 @@ def process(args):
 
 
 def main():
+    # Global parser
     global_parser = argparse.ArgumentParser(add_help=True)
     subparsers = global_parser.add_subparsers(
         help="Subcommands", dest="subcommand")
 
+    # Plot parser
     plot_parser = subparsers.add_parser(
         "plot", help="Plot particle distribution")
     plot_parser.add_argument(
@@ -70,6 +90,7 @@ def main():
         "-o", "--out-file", help="Results file", type=str, required=False, default="counts.nc")
     plot_parser.set_defaults(func=plot)
 
+    # Process parser
     process_parser = subparsers.add_parser(
         "process", help="Process particle file")
     process_parser.add_argument(
@@ -82,8 +103,8 @@ def main():
         "--topo", help="Topography (grid) file", type=str, required=False, default="topo.nc")
     process_parser.add_argument(
         "-dx", "--resolution", help="Resolution of grid (meters)", type=float)
-    process_parser.add_argument("--sort", help="Sort particles",
-                                choices=["id", "state"], type=str, required=False, default=None)
+    process_parser.add_argument(
+        "--sort", help="Sort particles", choices=["all", "id", "state"], nargs="*", type=str, required=False, default=["all", "id", "state"])
     process_parser.add_argument(
         "--id-list", help="List of particle IDs to use in processing", nargs="+", type=float)
     process_parser.add_argument(

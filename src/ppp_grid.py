@@ -145,8 +145,8 @@ class HorizontalGrid(Grid):
         self.lat = np.arange(
             np.nanmin(self.lat), np.nanmax(self.lat) + dlat_bin, dlat_bin)
 
-    def get_counts(self, particle_file, sort=None):
-        if (sort is None):
+    def get_counts(self, particle_file, sort):
+        if (sort == "all"):
             return self.counts(particle_file.positions())
         elif (sort == "id"):
             return self.counts_by_id(particle_file.positions(),

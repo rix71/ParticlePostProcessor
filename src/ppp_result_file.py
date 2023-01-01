@@ -21,15 +21,16 @@ class ResultsFile:
         self.coords = None
         self.type = None
         # Outgoing data
-        self.data = []
+        self.data = None
         self.exists = os.path.exists(filename)
         if (self.exists):
             self.check_dimensions()
 
-    def initialize(self, grid):
+    def initialize(self, grid, groups):
         self.type = grid.type
         self.dims = grid.dims
         self.coords = grid.coords
+        self.data = {group: [] for group in groups}
 
         # Check that the dimensions and coordinates are the same
         for dimname, dimsize in self.dims.items():
@@ -41,6 +42,7 @@ class ResultsFile:
                     f"Results file has dimension {dimname} with wrong size")
 
         # Create the file
+        print(f"Creating results file {self.filename}")
         ncout = Dataset(self.filename, "w", format="NETCDF4")
         for dimname, dimsize in self.dims.items():
             ncout.createDimension(dimname, dimsize)
@@ -52,25 +54,32 @@ class ResultsFile:
                          "type": self.type})
         ncout.close()
 
-    def append(self, data):
+    def append(self, data, group):
         """Append data dictionary to outgoing data"""
-        self.data.append(data)
+        self.data[group].append(data)
 
     def write(self):
+        print(f"Writing results to file {self.filename}")
         ncout = Dataset(self.filename, "a", format="NETCDF4")
-        for data in self.data:
-            # Check that the dimensions and coordinates are the same
-            for dimname in self.dims.keys():
-                if (dimname not in data["dims"]):
-                    raise Exception(
-                        f"Results file has dimension {dimname} that is not in data")
-            # Create the variable
-            ncout.createVariable(
-                data["name"], "float32", tuple(data["dims"].keys()))
-            # Write the data
-            ncout.variables[data["name"]][:] = data["data"]
-            # Add attributes
-            ncout.variables[data["name"]].setncatts(data["attrs"])
+        for data_group in self.data.keys():
+            for data_item in self.data[data_group]:
+                # Check that the dimensions and coordinates are the same
+                for dimname in self.dims.keys():
+                    if (dimname not in data_item["dims"]):
+                        raise Exception(
+                            f"Results file has dimension {dimname} that is not in data")
+                # Create the variable
+                for i_layer, (varname, varval) in enumerate(data_item["name_dict"].items()):
+                    full_varname = f"{data_group}_{varname}"
+                    ncout.createVariable(
+                        full_varname, "float32", tuple(data_item["dims"].keys()))
+                    # Write the data
+                    if (data_item["data"].ndim == 3):
+                        ncout.variables[full_varname][:] = data_item["data"][i_layer, :, :]
+                    else:
+                        ncout.variables[full_varname][:] = data_item["data"]
+                    # Add attributes
+                    ncout.variables[full_varname].setncatts(data_item["attrs"])
         ncout.close()
 
     def check_dimensions(self):

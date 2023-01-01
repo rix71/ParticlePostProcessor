@@ -14,8 +14,9 @@ class ParticleFile:
     Stores particle data from a single file.
     """
 
-    def __init__(self, filename, id_list=None):
+    def __init__(self, filename, id_list=None, ini_file=None):
         self.filename = filename
+        self._ini_file = ini_file
         self._lon = None
         self._lat = None
         self._depth = None
